@@ -35,6 +35,11 @@ async function getTabWithContainer(index) {
   return [tab, container];
 }
 
+function getAnchor(tab) {
+  if (tab.tagName === 'A') return tab;
+  return tab.querySelector("a");
+}
+
 setTimeout((async function(){
   const [secondTab, container] = await getTabWithContainer(1);
   if (!secondTab || !container) return;
@@ -42,7 +47,7 @@ setTimeout((async function(){
   const tab = secondTab.cloneNode(true);
   tab.querySelector(".YmvwI").textContent = "Maps";
 
-  const anchor = tab.querySelector("a");
+  const anchor = getAnchor(tab);
   anchor.href = "https://www.google.com/maps/search/" + document.querySelector('#APjFqb')?.textContent ?? "";
 
   container.insertBefore(tab, secondTab);
