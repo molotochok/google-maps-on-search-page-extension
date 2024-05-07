@@ -21,34 +21,43 @@ function waitForElement(selector, index) {
   ]).finally(() => clearTimeout(timer));
 }
 
-async function getTabWithContainer(index) {
-  const tabLabel = await waitForElement(".YmvwI", index);
-  if (!tabLabel) return [null, null];
+async function getTabsContainer(index) {
+  const label = await Promise.any([
+    waitForElement('.YmvwI', index), // label in the old design
+    waitForElement('.FMKtTb.UqcIvb', index), // label in the new design for All, Images
+    waitForElement('.O3S9Rb', index) // label in the new design for News, Videos, Books
+  ]);
 
-  let tab = tabLabel;
-  let container = tabLabel.parentElement;
+  if (!label) return null;
+
+  let tab = label;
+  let container = label.parentElement;
   while (container.childElementCount < 2) {
     tab = container;
     container = container.parentElement;
   }
 
-  return [tab, container];
+  return { tab, label, container };
 }
 
 function getAnchor(tab) {
   if (tab.tagName === 'A') return tab;
-  return tab.querySelector("a");
+  return tab.querySelector('a');
 }
 
 setTimeout((async function(){
-  const [secondTab, container] = await getTabWithContainer(1);
-  if (!secondTab || !container) return;
+  const tabsContainer = await getTabsContainer(2);
+  if (!tabsContainer) return;
 
-  const tab = secondTab.cloneNode(true);
-  tab.querySelector(".YmvwI").textContent = "Maps";
+  const tab = tabsContainer.tab.cloneNode(true);
+  tab.classList.remove('MgQdud');
+
+  const tabLabel = tab.getElementsByClassName(tabsContainer.label.classList.value)[0];
+  tabLabel.textContent = 'Maps';
+  tabLabel.removeAttribute("selected");
 
   const anchor = getAnchor(tab);
-  anchor.href = "https://www.google.com/maps/search/" + document.querySelector('#APjFqb')?.textContent ?? "";
-
-  container.insertBefore(tab, secondTab);
+  anchor.href = 'https://www.google.com/maps/search/' + document.querySelector('#APjFqb')?.textContent ?? '';
+  
+  tabsContainer.container.insertBefore(tab, tabsContainer.tab.previousElementSibling);
 }), 50);
